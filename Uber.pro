@@ -14,10 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    umap.cpp
+    umap.cpp \
+    uqt.cpp \
+    uassessor.cpp
 
 HEADERS  += mainwindow.h \
-    umap.h
+    umap.h \
+    uqt.h \
+    uassessor.h
 
 FORMS    += mainwindow.ui
 
@@ -28,4 +32,7 @@ DISTFILES += \
     google_maps.html \
     main.js \
     main.css \
-    keen.js
+    keen.js \
+    qwebchannel.js
+
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Werror

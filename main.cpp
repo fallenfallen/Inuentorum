@@ -10,6 +10,9 @@ main (int argc, char *argv[])
     QApplication a (argc, argv);
 
     QWebEngineSettings::globalSettings ()->setAttribute (QWebEngineSettings::ErrorPageEnabled, false);
+    QWebEngineSettings::globalSettings ()->setAttribute (QWebEngineSettings::LocalStorageEnabled, true);
+    QWebEngineSettings::globalSettings ()->setAttribute (QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    QWebEngineSettings::globalSettings ()->setAttribute (QWebEngineSettings::LocalContentCanAccessFileUrls, true);
 
 #ifndef QT_NO_DEBUG
 

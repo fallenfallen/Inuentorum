@@ -1,14 +1,23 @@
 
 #include "umap.h"
 #include <QWebEnginePage>
+#include <QWebEngineSettings>
+
+#if (QT_VERSION >= QT_VERSION_CHECK (5, 7, 0))
+
+#    include <QWebEngineProfile>
+
+#endif
 
 
 UMap::UMap (QWidget *parent)
     : QWebEngineView (parent)
 {
+
 #if (QT_VERSION >= QT_VERSION_CHECK (5, 7, 0))
 
     page ()->profile ()->clearHttpCache ();
+    page ()->profile ()->setHttpCacheType (QWebEngineProfile::MemoryHttpCache);
 
 #endif
 
@@ -20,3 +29,9 @@ UMap::~UMap ()
 
 }
 
+
+void
+UMap::contextMenuEvent (QContextMenuEvent *)
+{
+
+}

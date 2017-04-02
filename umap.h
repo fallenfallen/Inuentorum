@@ -14,6 +14,11 @@ public:
 
     explicit UMap (QWidget *parent = Q_NULLPTR);
     ~UMap ();
+
+
+protected:
+
+    virtual void contextMenuEvent (QContextMenuEvent *) override;
 };
 
 

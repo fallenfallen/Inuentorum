@@ -5,6 +5,7 @@
     <qresource prefix="/js">
         <file>main.js</file>
         <file>keen.js</file>
+        <file>qwebchannel.js</file>
     </qresource>
     <qresource prefix="/css">
         <file>main.css</file>

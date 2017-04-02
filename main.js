@@ -234,6 +234,7 @@ function init () {
         /* Debug feature */
 
         (+new Date).toString (16),
+        preserveViewport: true,
         map: map
     });
 
@@ -245,28 +246,48 @@ function init () {
     initiated = true;
     textDialog.dismiss ();
 
-    Keen.ajax.post (
-        "https://www.googleapis.com/geolocation/v1/geolocate?key=" + gApiKey,
-        {}, {
-        contentType: "application/json",
+    Keen.ajax.get ("http://ipinfo.io/geo", null, {
         onSuccess: function (data) {
-            Keen.log ("onSuccess", data);
-            if (!data || !Keen.isObject (data.location) ||
-                typeof (data.location.lat) !== "number" ||
-                typeof (data.location.lng) !== "number") {
-
+            Keen.log (data);
+            if (!data || typeof (data.loc) !== "string") {
                 return;
             }
 
-            Keen.log (data);
-            map.setCenter (data.location);
-        },
-        onFail: function (data) {
-            Keen.log ("failed", data);
+            data = data.loc.split (",");
+
+            if (data.length !== 2) {
+                return;
+            }
+
+            var pos = {
+                lat: parseFloat (data [0]),
+                lng: parseFloat (data [1])
+            };
+
+            if (!isNaN (pos.lat) && !isNaN (pos.lng)) {
+                map.setCenter (pos);
+            }
         }
     });
 
     //(new PollBikeDialog (dialogBody)).show ();
+}
+
+
+function retry () {
+    if (!initiated) {
+        Keen.log ("failed to load");
+        textDialog.show (tr ("We're dead!"),
+            tr ("It appears that you have no active Internet connection."));
+
+        Keen.head.removeChild (gApiScript);
+        window.google = null;
+        gApiScript = Keen.loadScript (
+            "https://maps.googleapis.com/maps/api/js?key=" + gApiKey +
+            "&callback=init");
+
+        setTimeout (retry, 10000);
+    }
 }
 
 
@@ -278,16 +299,4 @@ gApiScript = Keen.loadScript ("https://maps.googleapis.com/maps/api/js?key=" +
 
 Keen.log ("load up");
 
-setTimeout (function () {
-    if (!initiated) {
-        Keen.log ("failed to load");
-        textDialog.show (tr ("We're dead!"),
-            tr ("It appears that you have no active Internet connection."));
-
-        Keen.head.removeChild (gApiScript);
-        window.google = null;
-        gApiScript = Keen.loadScript (
-            "https://maps.googleapis.com/maps/api/js?key=" + gApiKey +
-            "&callback=init");
-    }
-}, 10000);
+setTimeout (retry, 10000);
