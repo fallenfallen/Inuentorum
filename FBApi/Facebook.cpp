@@ -13,7 +13,30 @@ void Facebook::showAuthWindow()
     FBwnd = new FBAuthWnd();
     FBwnd->show();
     connect(FBwnd, SIGNAL(sendCode(QString)), SLOT(getCode(QString)));
+}
 
+UserData Facebook::getUserData()
+{
+    UserData inf;
+    inf.fullName = this->getUserName();
+    inf.user_id = this->getUserId();
+    inf.photoLnk = this->getUserPhoto();
+
+    qDebug()<<"USER PHOTO: "<<inf.photoLnk;
+
+    return inf;
+}
+
+bool Facebook::isAuth()
+{
+    return this->authFlag;
+}
+
+void Facebook::logout()
+{
+    this->tocken = "";
+    this->authFlag = false;
+    this->code = "";
 }
 
 void Facebook::getTocken()
@@ -28,14 +51,58 @@ void Facebook::getTocken()
     RequestSender* sender = new RequestSender(3500);
     QByteArray response = sender->get(req);
 
+    qDebug()<<"[getTocken] tocken:"<<response;
+
     QJsonDocument doc = QJsonDocument::fromJson(response);
     QJsonObject jsonObject = doc.object();
     QJsonObject::iterator itr = jsonObject.find("access_token");
     tocken = itr.value().toString();
+    this->authFlag = true;
+    emit completed();
 }
 
 void Facebook::getCode(QString t)
 {
     code = t;
+    qDebug()<<"[getCode func] code:"<<code;
     getTocken();
+}
+
+QString Facebook::getUserId()
+{
+    QString reqStr = QString("https://graph.facebook.com/v2.8/me?access_token=%1").arg(tocken);
+    Request req;
+    req.setAddress(reqStr);
+    RequestSender* sender = new RequestSender(3500);
+    QByteArray response = sender->get(req);
+
+    QJsonDocument doc = QJsonDocument::fromJson(response);
+    QJsonObject jsonObject = doc.object();
+    return jsonObject.find("id").value().toString();
+}
+
+QString Facebook::getUserName()
+{
+    QString reqStr = QString("https://graph.facebook.com/v2.8/me?access_token=%1").arg(tocken);
+    Request req;
+    req.setAddress(reqStr);
+    RequestSender* sender = new RequestSender(3500);
+    QByteArray response = sender->get(req);
+
+    QJsonDocument doc = QJsonDocument::fromJson(response);
+    QJsonObject jsonObject = doc.object();
+    return jsonObject.find("name").value().toString();
+}
+
+QString Facebook::getUserPhoto()
+{
+    QString reqStr = QString("https://graph.facebook.com/me/picture?redirect=0&fields=url&access_token=%1").arg(tocken);
+    Request req;
+    req.setAddress(reqStr);
+    RequestSender* sender = new RequestSender(3500);
+    QByteArray response = sender->get(req);
+
+    QJsonDocument doc = QJsonDocument::fromJson(response);
+    QJsonObject jsonObject = doc.object();
+    return jsonObject.find("data").value().toObject().find("url").value().toString();
 }

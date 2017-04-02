@@ -16,11 +16,13 @@ class MapWnd : public QMainWindow
 
 public:
      MapWnd(const QUrl& url);
+     ~MapWnd();
 
 protected slots:
     void finishLoading(bool);
     void findLocation();
     void facebookAuth(bool);
+    void loadfriends();
 
 private:
     QWebEngineView *view;

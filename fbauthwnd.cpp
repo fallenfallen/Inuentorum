@@ -5,7 +5,11 @@
 FBAuthWnd::FBAuthWnd()
 {
     wview = new QWebEngineView(this);
-    wview->load(QUrl("https://www.facebook.com/v2.8/dialog/oauth?client_id=1808955962713438&redirect_uri=https://www.facebook.com/connect/login_success.html"));
+    //wview->page()->profile()->cookieStore()->deleteAllCookies();
+    wview->load(QUrl("https://www.facebook.com/v2.8/dialog/oauth?client_id=1808955962713438"
+                     "&redirect_uri=https://www.facebook.com/connect/login_success.html"
+                     "&scope=user_location,user_friends"));
+    //wview->page()->profile()->cookieStore()->deleteAllCookies();
     connect(wview, SIGNAL(loadFinished(bool)), SLOT(finishLoading(bool)));
     setCentralWidget(wview);
 }
@@ -18,6 +22,7 @@ void FBAuthWnd::finishLoading(bool)
     {
         url.remove("https://www.facebook.com/connect/login_success.html?code=");
         code = url;
+        qDebug()<<"recv code: "<<url;
         emit sendCode(code);
         this->close();
     }

@@ -19,6 +19,12 @@ MapWnd::MapWnd(const QUrl& url)
     setCentralWidget(view);
 }
 
+MapWnd::~MapWnd()
+{
+    delete view;
+    delete fb;
+}
+
 
 void MapWnd::finishLoading(bool)
 {
@@ -31,25 +37,35 @@ void MapWnd::findLocation()
     req.setAddress("http://ipinfo.io/geo");
     RequestSender* sender = new RequestSender(1000);
     QByteArray response = sender->get(req);
+    if(response!="")
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject jsonObject = doc.object();
+        QJsonObject::iterator itr = jsonObject.find("loc");
+        QString location = itr.value().toString();
 
-    QJsonDocument doc = QJsonDocument::fromJson(response);
-    QJsonObject jsonObject = doc.object();
-    QJsonObject::iterator itr = jsonObject.find("loc");
-    QString location = itr.value().toString();
+        QString lat, lng;
 
-    QString lat, lng;
+        QRegExp regexp("[,]");
+        QStringList arr = location.split(regexp, QString::SkipEmptyParts);
+        lat = arr.at(0);
+        lng = arr.at(1);
 
-    QRegExp regexp("[,]");
-    QStringList arr = location.split(regexp, QString::SkipEmptyParts);
-    lat = arr.at(0);
-    lng = arr.at(1);
-
-    QString code;
-    code =  QString("map.setCenter({lat: %1, lng: %2})").arg(lat).arg(lng);
-    view->page()->runJavaScript(code);
+        QString code;
+        code =  QString("map.setCenter({lat: %1, lng: %2})").arg(lat).arg(lng);
+        view->page()->runJavaScript(code);
+    }
 }
 
 void MapWnd::facebookAuth(bool)
 {
     fb->showAuthWindow();
+    connect(fb, SIGNAL(completed()), SLOT(loadfriends()));
+}
+
+void MapWnd::loadfriends()
+{
+    UserData tmp = fb->getUserData();
+    qDebug()<<tmp.fullName;
+    qDebug()<<tmp.photoLnk;
 }
