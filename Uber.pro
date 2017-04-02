@@ -28,6 +28,4 @@ DISTFILES += \
     google_maps.html \
     main.js \
     main.css \
-    keen.js \
-    main.kml \
-    khortytsia.kml
+    keen.js

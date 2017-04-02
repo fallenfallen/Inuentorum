@@ -9,8 +9,4 @@
     <qresource prefix="/css">
         <file>main.css</file>
     </qresource>
-    <qresource prefix="/kml">
-        <file>main.kml</file>
-        <file>khortytsia.kml</file>
-    </qresource>
 </RCC>

@@ -221,7 +221,7 @@ function init () {
 
     map = new google.maps.Map (document.getElementById ("map"), options);
     kmlLayer = new google.maps.KmlLayer ({
-        url: "qrc:/kml/main.kml",
+        url: "https://rawgit.com/chiffathefox/uberkml/master/main.kml",
         map: map
     });
 
