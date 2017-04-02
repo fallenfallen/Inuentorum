@@ -12,12 +12,12 @@
             <name>Khortytsia</name>
 
             <Region>
-                <LatLonBox>
+                <LatLonAltBox>
                     <north>47.862701</north>
                     <south>47.804277</south>
                     <east>35.153160</east>
                     <west>35.073509</west>
-                </LatLonBox>
+                </LatLonAltBox>
 
                 <Lod>
                     <minLodPixels>128</minLodPixels>
