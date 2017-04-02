@@ -3,26 +3,28 @@
 #include <QNetworkReply>
 #include "Rest_sender/request.h"
 #include "Rest_sender/requestsender.h"
-#include "FBApi/Facebook.h"
-
+#include "QtWebChannel"
+#include "QString"
 
 QT_BEGIN_NAMESPACE
 class QWebEngineView;
 QT_END_NAMESPACE
 
-class MapWnd : public QMainWindow
+class FBAuthWnd : public QMainWindow
 {
     Q_OBJECT
 
 public:
-     MapWnd(const QUrl& url);
+     FBAuthWnd();
+
+signals:
+     void sendCode(QString code);
+
 
 protected slots:
     void finishLoading(bool);
-    void findLocation();
-    void facebookAuth(bool);
 
 private:
-    QWebEngineView *view;
-    Facebook* fb;
+    QWebEngineView *wview;
+    QString code;
 };

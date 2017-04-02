@@ -1,15 +1,20 @@
-QT      +=  webenginewidgets
+QT      +=  webenginewidgets webchannel
 
 SOURCES += main.cpp\
         mapwnd.cpp \
     Rest_sender/request.cpp \
-    Rest_sender/requestsender.cpp
+    Rest_sender/requestsender.cpp \
+    fbauthwnd.cpp \
+    FBApi/Facebook.cpp
 
 HEADERS  += mapwnd.h \
     Rest_sender/request.h \
-    Rest_sender/requestsender.h
+    Rest_sender/requestsender.h \
+    fbauthwnd.h \
+    FBApi/Facebook.h
 
-FORMS    += mapwnd.ui
+FORMS    += mapwnd.ui \
+    fbauthwnd.ui
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/webenginewidgets/contentmanipulation
@@ -17,6 +22,7 @@ INSTALLS += target
 
 OTHER_FILES += \
     google_maps.html
+    qwebchannel.js
 
 RESOURCES += \
     res.qrc

@@ -1,0 +1,14 @@
+<!-- NOTE: this is what you're missing -->
+<script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+
+<script type="text/javascript">
+    <!-- it's a good idea to initialize webchannel after DOM ready, if your code is going to manipulate the DOM -->
+    document.addEventListener("DOMContentLoaded", function () {
+        new QWebChannel(qt.webChannelTransport, function (channel) {
+            var jshelper = channel.objects.jshelper;
+			jshelper.test1();
+			jshelper.test2();
+            // do what you gotta do
+        });
+    });
+</script>
