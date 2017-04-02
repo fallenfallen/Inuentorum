@@ -1,17 +1,4 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2017-04-02T16:22:54
-#
-#-------------------------------------------------
-
 QT      +=  webenginewidgets
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = release_project
-TEMPLATE = app
-
-DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         mapwnd.cpp \
@@ -27,3 +14,10 @@ FORMS    += mapwnd.ui
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/webenginewidgets/contentmanipulation
 INSTALLS += target
+
+OTHER_FILES += \
+    google_maps.html
+
+RESOURCES += \
+    res.qrc
+

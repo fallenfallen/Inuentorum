@@ -4,8 +4,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MapWnd w;
-    w.show();
+
+    QUrl url = QUrl("http://www.google.com/ncr");
+    MapWnd *browser = new MapWnd(url);
+    browser->show();
 
     return a.exec();
 }
