@@ -18,6 +18,7 @@
         </Region>
 
         <Placemark>
+            <name>Track1</name>
             <styleUrl>qrc:/kml/main.kml#trackIntermediate</styleUrl>
             <LineString>
                 <tessellate>1</tessellate>
