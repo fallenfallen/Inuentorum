@@ -1,4 +1,5 @@
 
+var gApiKey = "AIzaSyCnu1OB9AyyaDeX77dhkl26lbgcRVKHufA";
 var map;
 var kmlLayer;
 
@@ -220,13 +221,49 @@ function init () {
     };
 
     map = new google.maps.Map (document.getElementById ("map"), options);
+
+    /*
+     * Download up-to-date KML files.
+     * google.maps.KmlLayer refuses to download them
+     * from qrc though.
+     */
+
     kmlLayer = new google.maps.KmlLayer ({
-        url: "https://rawgit.com/chiffathefox/uberkml/master/main.kml",
+        url: "https://rawgit.com/chiffathefox/uberkml/master/main.kml?" +
+
+        /* Debug feature */
+
+        (+new Date).toString (16),
         map: map
+    });
+
+    kmlLayer.addListener ("click", function (event) {
+        Keen.log (event.featureData);
+        event.featurData.infoWindowHtml = "";
     });
 
     initiated = true;
     textDialog.dismiss ();
+
+    Keen.ajax.post (
+        "https://www.googleapis.com/geolocation/v1/geolocate?key=" + gApiKey,
+        {}, {
+        onSuccess: function (data) {
+            Keen.log ("onSuccess", data);
+            if (!data || !Keen.isObject (data.location) ||
+                typeof (data.location.lat) !== "number" ||
+                typeof (data.location.lng) !== "number") {
+
+                return;
+            }
+
+            Keen.log (data);
+            map.setCenter (data.location);
+        },
+        onFail: function (data) {
+            Keen.log ("failed", data);
+        }
+    });
 
     //(new PollBikeDialog (dialogBody)).show ();
 }
@@ -235,7 +272,8 @@ function init () {
 textDialog = new TextDialog (dialogBody);
 textDialog.show (tr ("Please, wait"), tr ("We're loading something ..."));
 
-gApiScript = Keen.loadScript ("https://maps.googleapis.com/maps/api/js?key=AIzaSyCnu1OB9AyyaDeX77dhkl26lbgcRVKHufA&callback=init");
+gApiScript = Keen.loadScript ("https://maps.googleapis.com/maps/api/js?key=" +
+    gApiKey + "&callback=init");
 
 Keen.log ("load up");
 
@@ -247,6 +285,8 @@ setTimeout (function () {
 
         Keen.head.removeChild (gApiScript);
         window.google = null;
-        gApiScript = Keen.loadScript ("https://maps.googleapis.com/maps/api/js?key=AIzaSyCnu1OB9AyyaDeX77dhkl26lbgcRVKHufA&callback=init");
+        gApiScript = Keen.loadScript (
+            "https://maps.googleapis.com/maps/api/js?key=" + gApiKey +
+            "&callback=init");
     }
 }, 10000);

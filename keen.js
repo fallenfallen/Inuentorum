@@ -985,11 +985,72 @@
                 var xhr = getXHR ();
 
                 url = Keen.ajax.fixUrl (url);
-                query = Keen.ajax.toQuery (query);
 
                 options = Keen.extend ({
                     timeout: 15000,
                     contentType: "application/x-www-form-urlencoded"
+                }, options);
+
+                if (options.contentType === "application/json") {
+                    query = Keen.toJSON (query);
+                } else {
+                    query = Keen.ajax.toQuery (query);
+                }
+                
+                xhr.onreadystatechange = function () {
+                    Keen.log (xhr.readyState, xhr.status, xhr.statusText);
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200 &&
+                            Keen.isFunction (options.onSuccess)) {
+                            options.onSuccess (
+                                Keen.parseJSON (xhr.responseText));
+                        } else if (Keen.isFunction (options.onFail)) {
+                            options.onFail (
+                                Keen.parseJSON (xhr.responseText));
+                        }
+                    }
+                };
+
+                if (Keen.isFunction (options.onProgress)) {
+                    xhr.onprogress = options.onProgress;
+                }
+
+                if (xhr.upload !== undefined &&
+                    Keen.isFunction (options.onUploadProgress)) {
+
+                    xhr.upload.onprogress = options.onUploadProgress;
+                }
+
+                try {
+                    xhr.open ("POST", url, true);
+
+                    xhr.timeout = options.timeout;
+
+                    xhr.setRequestHeader ("X-Requested-With", "XMLHttpRequest");
+                    xhr.setRequestHeader ("Content-Type", options.contentType);
+
+                    xhr.send (query);
+                } catch (e) {
+                    Keen.log ("[ Keen.ajax ]", e);
+
+                    if (options && Keen.isFunction (options.onFail)) {
+                        options.onFail ();
+                    }
+                }
+            },
+
+            get: function (url, query, options) {
+                var xhr = getXHR ();
+
+                url = Keen.ajax.fixUrl (url);
+                query = Keen.ajax.toQuery (query);
+
+                if (query) {
+                    url += "?" + query;
+                }
+
+                options = Keen.extend ({
+                    timeout: 15000,
                 }, options);
                 
                 xhr.onreadystatechange = function () {
@@ -1009,19 +1070,14 @@
                     xhr.onprogress = options.onProgress;
                 }
 
-                if (xhr.upload !== undefined && Keen.isFunction (options.onUploadProgress)) {
-                    xhr.upload.onprogress = options.onUploadProgress;
-                }
-
                 try {
-                    xhr.open ("POST", url, true);
+                    xhr.open ("GET", url, true);
 
                     xhr.timeout = options.timeout;
 
                     xhr.setRequestHeader ("X-Requested-With", "XMLHttpRequest");
-                    xhr.setRequestHeader ("Content-Type", options.contentType);
 
-                    xhr.send (query);
+                    xhr.send ();
                 } catch (e) {
                     Keen.log ("[ Keen.ajax ]", e);
 
@@ -1115,6 +1171,14 @@
                 return evalJSON (str);
             }
         } : evalJSON,
+
+        toJSON: function (str) {
+            try {
+                return JSON.stringify (str);
+            } catch (e) {
+                return "{}";
+            }
+        },
 
         createElement: function (tag, attr, style) {
             tag = document.createElement (tag);
