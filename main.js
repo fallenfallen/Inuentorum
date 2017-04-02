@@ -221,7 +221,7 @@ function init () {
 
     map = new google.maps.Map (document.getElementById ("map"), options);
     kmlLayer = new google.maps.KmlLayer ({
-        url: "./kml/khortytsia.kml",
+        url: "qrc:/kml/main.kml",
         map: map
     });
 
