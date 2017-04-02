@@ -3,17 +3,14 @@
 #define UMAP_H
 
 
-#include "uqt.h"
-#include <QWebView>
+#include <QWebEngineView>
 
 
-class UMap : public QWebView
+class UMap : public QWebEngineView
 {
 
 
 public:
-
-    UQt *qt;
 
     explicit UMap (QWidget *parent = Q_NULLPTR);
     ~UMap ();

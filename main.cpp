@@ -1,7 +1,7 @@
 
 #include "mainwindow.h"
 #include <QApplication>
-#include <QWebSettings>
+#include <QWebEngineSettings>
 
 
 int
@@ -9,11 +9,13 @@ main (int argc, char *argv[])
 {
     QApplication a (argc, argv);
 
-    QWebSettings::globalSettings ()->setAttribute (QWebSettings::PrivateBrowsingEnabled, true);
+    QWebEngineSettings::globalSettings ()->setAttribute (QWebEngineSettings::ErrorPageEnabled, false);
 
 #ifndef QT_NO_DEBUG
 
-    QWebSettings::globalSettings ()->setAttribute (QWebSettings::DeveloperExtrasEnabled, true);
+    if (!qputenv ("QTWEBENGINE_REMOTE_DEBUGGING", QByteArray::fromRawData ("2048", sizeof ("2048")))) {
+        qFatal ("qputenv failed");
+    }
 
 #endif
 
