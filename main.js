@@ -248,6 +248,7 @@ function init () {
     Keen.ajax.post (
         "https://www.googleapis.com/geolocation/v1/geolocate?key=" + gApiKey,
         {}, {
+        contentType: "application/json",
         onSuccess: function (data) {
             Keen.log ("onSuccess", data);
             if (!data || !Keen.isObject (data.location) ||
