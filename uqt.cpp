@@ -17,7 +17,7 @@ UQt::loginFacebookSlot ()
         return;
     }
 
-    loginFacebookEmitted = true;
+    //loginFacebookEmitted = true;
 
     emit loginFacebook ();
 }

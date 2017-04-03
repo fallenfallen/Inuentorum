@@ -5,7 +5,7 @@
 FBAuthWnd::FBAuthWnd()
 {
     wview = new QWebEngineView(this);
-   // wview->page()->profile()->cookieStore()->deleteAllCookies();
+    wview->page()->profile()->cookieStore()->deleteAllCookies();
     wview->load(QUrl("https://www.facebook.com/v2.8/dialog/oauth?client_id=1808955962713438"
                      "&redirect_uri=https://www.facebook.com/connect/login_success.html"
                      "&display=popup"
@@ -23,8 +23,10 @@ FBAuthWnd::FBAuthWnd()
 void FBAuthWnd::finishLoading(bool)
 {
     QString url = wview->url().toString();
-    if(!url.contains("login.php"))
+        //qDebug()<<"URL: "<<url;
+    if(url.contains("https://www.facebook.com/connect/login_success.html?code="))
     {
+        //qDebug()<<"LOGGED";
         url.remove("https://www.facebook.com/connect/login_success.html?code=");
         code = url;
         //qDebug()<<"recv code: "<<url;
