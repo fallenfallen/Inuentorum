@@ -376,6 +376,7 @@ function loginFacebook () {
 
 
 var map;
+var markersHashTable = {};
 var lastInfoWindow = null;
 
 
@@ -390,6 +391,12 @@ function loadMarkers()
             }
 
             Keen.each (data, function (k, v) {
+                if (markersHashTable [v.id]) {
+                    return;
+                }
+
+                markersHashTable [v.id] = true;
+
                 var pos = {
                     lat: parseFloat(v.lat),
                     lng: parseFloat(v.lng)
@@ -477,7 +484,8 @@ function init () {
                     textDialog.show (tr ("Thank you!"),
                         tr ("For your commitment in our services"),
                         tr ("You're welcome"));
-						loadMarkers();
+
+                    loadMarkers();
                 },
 
                 onFail: function () {
