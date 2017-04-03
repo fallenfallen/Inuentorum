@@ -279,10 +279,9 @@ var MarkerDialog = function (dialogEl) {
 
 
     var line = Keen.createElement ("tr");
-    var cell = Keen.createElement ("td", {
-        colspan: 2
-    });
+    var cell = Keen.createElement ("td");
     var button = Keen.createElement ("button");
+    this.btnEl = button;
 
     Keen.data (button, "marker_dialog", this);
 
@@ -291,6 +290,19 @@ var MarkerDialog = function (dialogEl) {
     });
 
     button.textContent = tr ("Post");
+    cell.appendChild (button);
+    line.appendChild (cell);
+
+    button = Keen.createElement ("button");
+    Keen.data (button, "marker_dialog", this);
+
+    Keen.event.add (button, "click", function (event) {
+        Keen.data (event.target, "marker_dialog").dismiss ();
+    });
+
+    button.textContent = tr ("Cancel");
+
+    cell = Keen.createElement ("td");
     cell.appendChild (button);
     line.appendChild (cell);
     tableEl.appendChild (line);
@@ -377,11 +389,23 @@ function init () {
     map = new google.maps.Map (document.getElementById ("map"), options);
 	
     google.maps.event.addListener(map, "rightclick", function(event) {
+        var running = false;
         var lat = event.latLng.lat();
         var lng = event.latLng.lng();
 
         markerDialog.show (function (dialog, name, message) {
-            Keen.ajax.get ("http://dev2.gditeck.com/register.php", {
+            Keen.log ("show");
+            if (running) {
+                return;
+            }
+
+            running = true;
+
+            Keen.toggle (dialog.nameEl);
+            Keen.toggle (dialog.messageEl);
+            Keen.toggle (dialog.btnEl);
+
+            Keen.ajax.post ("http://dev2.gditeck.com/register.php", {
                 user_id: facebookId,
                 lat: event.latLng.lat (),
                 lng: event.latLng.lng (),
@@ -389,28 +413,26 @@ function init () {
                 message: message
             }, {
                 onSuccess: function () {
+                    Keen.toggle (dialog.nameEl);
+                    Keen.toggle (dialog.messageEl);
+                    Keen.toggle (dialog.btnEl);
+
                     textDialog.show (tr ("Thank you!"),
-                        tr ("For you commitment in out services"),
+                        tr ("For your commitment in our services"),
                         tr ("You're welcome"));
                 },
 
                 onFail: function () {
+                    Keen.toggle (dialog.nameEl);
+                    Keen.toggle (dialog.messageEl);
+                    Keen.toggle (dialog.btnEl);
+
                     textDialog.show (tr ("Sorry!"),
-                        tr ("We wasn't able to send ypur marker"),
+                        tr ("We wasn't able to send your marker"),
                         tr ("OK"));
                 }
             });
         });
-
-        /*
-        Keen.ajax.get (
-            "http://dev2.gditeck.com/register.php?user_id=1&lat="+lat+"&lng="+lng+"&title=test&message=mess", null, {
-            onSuccess: function (data) {
-                Keen.log (data);
-            }
-        });
-        */
-
     });
 
     /*

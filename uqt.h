@@ -9,6 +9,8 @@ class UQt : public QObject
 {
     Q_OBJECT
 
+    bool loginFacebookEmitted = false;
+
 
 public:
     explicit UQt (QObject *parent = Q_NULLPTR);

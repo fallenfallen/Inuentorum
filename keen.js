@@ -998,7 +998,6 @@
                 }
                 
                 xhr.onreadystatechange = function () {
-                    Keen.log (xhr.readyState, xhr.status, xhr.statusText);
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200 &&
                             Keen.isFunction (options.onSuccess)) {
