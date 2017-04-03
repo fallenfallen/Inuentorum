@@ -5,13 +5,17 @@ SOURCES += main.cpp\
     Rest_sender/request.cpp \
     Rest_sender/requestsender.cpp \
     fbauthwnd.cpp \
-    FBApi/Facebook.cpp
+    FBApi/Facebook.cpp \
+    umap.cpp \
+    uqt.cpp
 
 HEADERS  += mapwnd.h \
     Rest_sender/request.h \
     Rest_sender/requestsender.h \
     fbauthwnd.h \
-    FBApi/Facebook.h
+    FBApi/Facebook.h \
+    umap.h \
+    uqt.h
 
 FORMS    += mapwnd.ui \
     fbauthwnd.ui

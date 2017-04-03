@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/html">
         <file>google_maps.html</file>
-        <file>test.html</file>
     </qresource>
     <qresource prefix="/js">
         <file>keen.js</file>

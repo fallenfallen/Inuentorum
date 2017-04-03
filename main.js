@@ -4,22 +4,36 @@ var map;
 var kmlLayer;
 
 var initiated = false;
-var textDialog, gApiScript;
+var textDialog, gApiScript, markerDialog;
 var overlayEl = Ki ("overlay");
 var dialogBody = Ki ("dialog_body");
+var facebookId;
 
 
 var TextDialog = function (dialogEl) {
     this.dialogEl = dialogEl;
     this.titleEl = Keen.createElement ("h1");
     this.textEl = Keen.createElement ("p");
+    this.btnEl = Keen.createElement ("button");
 
     Keen.class.add (this.titleEl, "title");
     Keen.class.add (this.textEl, "text");
+
+    Keen.data (this.btnEl, "text_dialog", this);
+
+    Keen.event.add (this.btnEl, "click", function (event) {
+        var dialog = Keen.data (event.target, "text_dialog");
+
+        if (dialog.callback) {
+            dialog.callback (dialog, event);
+        } else {
+            dialog.dismiss ();
+        }
+    });
 };
 
 TextDialog.prototype = {
-    show: function (title, text) {
+    show: function (title, text, btnText, callback) {
         var dialog = Keen.data (this.dialogEl, "dialog");
 
         if (dialog !== this && dialog) {
@@ -29,9 +43,18 @@ TextDialog.prototype = {
         this.titleEl.textContent = title;
         this.textEl.textContent = text;
 
+        if (btnText) {
+            this.callback = callback;
+            this.btnEl.textContent = btnText;
+            Keen.show (this.btnEl);
+        } else {
+            Keen.hide (this.btnEl);
+        }
+
         if (dialog !== this || !dialog) {
             this.dialogEl.appendChild (this.titleEl);
             this.dialogEl.appendChild (this.textEl);
+            this.dialogEl.appendChild (this.btnEl);
         }
 
         Keen.data (this.dialogEl, "dialog", this);
@@ -47,8 +70,17 @@ TextDialog.prototype = {
 
         this.dialogEl.removeChild (this.titleEl);
         this.dialogEl.removeChild (this.textEl);
+        this.dialogEl.removeChild (this.btnEl);
 
         Keen.clean (this.dialogEl, "dialog");
+    },
+
+    done: function (event) {
+        if (this.callback) {
+            this.callback (this, event);
+        } else {
+            this.dismiss ();
+        }
     }
 };
 
@@ -205,13 +237,133 @@ PollBikeDialog.prototype = {
 };
 
 
+var MarkerDialog = function (dialogEl) {
+    this.dialogEl = dialogEl;
+    this.titleEl = Keen.createElement ("h1");
+    this.titleEl.textContent = tr ("Please, tell us what happened here");
+    this.tableEl = Keen.createElement ("table");
+    var tableEl = this.tableEl;
+
+    Keen.class.add (this.titleEl, "title");
+    Keen.style (tableEl, {
+        width: "100%",
+        textAlign: "left"
+    });
+
+    function addRow (el, text) {
+        var line = Keen.createElement ("tr");
+        var cell = Keen.createElement ("td");
+        var label = Keen.createElement ("label");
+
+        cell.textContent = tr (text);
+        line.appendChild (cell);
+
+        cell = Keen.createElement ("td");
+        cell.appendChild (el);
+        line.appendChild (cell);
+        tableEl.appendChild (line);
+    }
+
+    this.nameEl = Keen.createElement ("input", {
+        type: "text"
+    });
+
+    addRow (this.nameEl, "Name it: ");
+
+
+    this.messageEl = Keen.createElement ("input", {
+        type: "text"
+    });
+
+    addRow (this.messageEl, "Describe it: ");
+
+
+    var line = Keen.createElement ("tr");
+    var cell = Keen.createElement ("td", {
+        colspan: 2
+    });
+    var button = Keen.createElement ("button");
+
+    Keen.data (button, "marker_dialog", this);
+
+    Keen.event.add (button, "click", function (event) {
+        Keen.data (event.target, "marker_dialog").done ();
+    });
+
+    button.textContent = tr ("Post");
+    cell.appendChild (button);
+    line.appendChild (cell);
+    tableEl.appendChild (line);
+};
+
+
+MarkerDialog.prototype = {
+    show: function (callback) {
+        this.callback = callback;
+
+        var dialog = Keen.data (this.dialogEl, "dialog");
+
+        if (dialog !== this && dialog) {
+            dialog.dismiss ();
+        }
+
+        this.nameEl.value = "";
+        this.messageEl.value = "";
+
+        if (dialog !== this || !dialog) {
+            this.dialogEl.appendChild (this.titleEl);
+            this.dialogEl.appendChild (this.tableEl);
+        }
+
+        Keen.data (this.dialogEl, "dialog", this);
+        Keen.show (overlay);
+    },
+
+    dismiss: function () {
+        if (Keen.data (this.dialogEl, "dialog") !== this) {
+            return;
+        }
+
+        Keen.hide (overlay);
+
+        this.dialogEl.removeChild (this.titleEl);
+        this.dialogEl.removeChild (this.tableEl);
+
+        Keen.clean (this.dialogEl, "dialog");
+    },
+
+    done: function () {
+        var name = this.nameEl.value;
+        var message = this.messageEl.value;
+
+        if (!name) {
+            Keen.Fx.poke (this.nameEl, { backgroundColor: "#EAB1AA" });
+        }
+
+        if (!message) {
+            Keen.Fx.poke (this.nameEl, { backgroundColor: "#EAB1AA" });
+        }
+
+        if (name && message) {
+            this.callback (this, name, message);
+        }
+    }
+};
+
+
 function tr (str) {
     return str;
 }
 
 
+function loginFacebook () {
+    new QWebChannel (qt.webChannelTransport, function (channel) {
+        channel.objects.Qt.loginFacebookSlot ();
+    });
+}
+
+
 function init () {
-	
     var options = {
         center: {
             lat: 47.845502,
@@ -224,23 +376,42 @@ function init () {
 
     map = new google.maps.Map (document.getElementById ("map"), options);
 	
-	//get point
-	google.maps.event.addListener(map, "rightclick", function(event) {
-		var lat = event.latLng.lat();
-		var lng = event.latLng.lng();
-		console.log("Lat=" + lat + "; Lng=" + lng);
-		
-		Keen.ajax.get ("http://dev2.gditeck.com/register.php?user_id=1&lat="+lat+"&lng="+lng+"&title=test&message=mess", null, {
-        onSuccess: function (data) {
-            Keen.log (data);
-        }
+    google.maps.event.addListener(map, "rightclick", function(event) {
+        var lat = event.latLng.lat();
+        var lng = event.latLng.lng();
+
+        markerDialog.show (function (dialog, name, message) {
+            Keen.ajax.get ("http://dev2.gditeck.com/register.php", {
+                user_id: facebookId,
+                lat: event.latLng.lat (),
+                lng: event.latLng.lng (),
+                title: name,
+                message: message
+            }, {
+                onSuccess: function () {
+                    textDialog.show (tr ("Thank you!"),
+                        tr ("For you commitment in out services"),
+                        tr ("You're welcome"));
+                },
+
+                onFail: function () {
+                    textDialog.show (tr ("Sorry!"),
+                        tr ("We wasn't able to send ypur marker"),
+                        tr ("OK"));
+                }
+            });
+        });
+
+        /*
+        Keen.ajax.get (
+            "http://dev2.gditeck.com/register.php?user_id=1&lat="+lat+"&lng="+lng+"&title=test&message=mess", null, {
+            onSuccess: function (data) {
+                Keen.log (data);
+            }
+        });
+        */
+
     });
-		
-	});
-	
-	
-	
-	
 
     /*
      * Download up-to-date KML files.
@@ -248,10 +419,10 @@ function init () {
      * from qrc though.
      */
 
+    /* 
     kmlLayer = new google.maps.KmlLayer ({
         url: "https://rawgit.com/chiffathefox/uberkml/master/main.kml?" +
 
-        /* Debug feature */
 
         (+new Date).toString (16),
         preserveViewport: true,
@@ -262,11 +433,15 @@ function init () {
         Keen.log (event.featureData);
         event.featurData.infoWindowHtml = "";
     });
+    */
+
+    textDialog.show (tr ("Who are you?"),
+        tr ("Please, login via Facebook in order " +
+            "to use full service's features"), tr ("Login"), loginFacebook);
 
     initiated = true;
-    textDialog.dismiss ();
-	//Because of this shit sleep all window ¯ \ _ (ツ) _ / ¯
-/*
+
+    /* 
     Keen.ajax.get ("http://ipinfo.io/geo", null, {
         onSuccess: function (data) {
             Keen.log (data);
@@ -311,14 +486,15 @@ function retry () {
     }
 }
 
-function setProfile(name, img)
-{
-	$("#name").text(name);
-	$(".avimg").attr("src",img);
-	$("#profile").show();
+function setProfile(name, img, id) {
+    Ki ("name").textContent = name;
+    Ki ("avimg").setAttribute ("src", img);
+    Keen.show (Ki ("profile"));
+    facebookId = id;
 }
 
 
+markerDialog = new MarkerDialog (dialogBody);
 textDialog = new TextDialog (dialogBody);
 textDialog.show (tr ("Please, wait"), tr ("We're loading something ..."));
 

@@ -2,73 +2,36 @@
 #include <QtWebEngineWidgets>
 #include "mapwnd.h"
 
-MapWnd::MapWnd(const QUrl& url)
-{
-    view = new QWebEngineView(this);
-    view->load(QUrl("qrc:/html/google_maps.html"));
-    connect(view, SIGNAL(loadFinished(bool)), SLOT(finishLoading(bool)));
 
-    authButt = new QPushButton(this);
-    authButt->setText("Login with facebook");\
-    authButt->setGeometry(this->width(), 0, 150, 40);
-    //butt->move(100, 100);
-    connect(authButt, SIGNAL(clicked(bool)), SLOT(facebookAuth(bool)));
+MapWnd::MapWnd (QWidget *)
+    : map (new UMap (this))
+{
+    connect (map->qt, SIGNAL (loginFacebook ()), this, SLOT (facebookAuth ()));
 
     fb = new Facebook("1808955962713438", "093350c2fe425997e271b3ccf323f5b90");
 
-    setCentralWidget(view);
+    setCentralWidget(map);
 }
+
 
 MapWnd::~MapWnd()
 {
-    delete view;
     delete fb;
 }
 
 
-void MapWnd::finishLoading(bool)
-{
-    //findLocation();
-}
-
-void MapWnd::findLocation()
-{
-    Request req;
-    req.setAddress("http://ipinfo.io/geo");
-    RequestSender* sender = new RequestSender(1000);
-    QByteArray response = sender->get(req);
-    if(response!="")
-    {
-        QJsonDocument doc = QJsonDocument::fromJson(response);
-        QJsonObject jsonObject = doc.object();
-        QJsonObject::iterator itr = jsonObject.find("loc");
-        QString location = itr.value().toString();
-
-        QString lat, lng;
-
-        QRegExp regexp("[,]");
-        QStringList arr = location.split(regexp, QString::SkipEmptyParts);
-        lat = arr.at(0);
-        lng = arr.at(1);
-
-        QString code;
-        code =  QString("map.setCenter({lat: %1, lng: %2})").arg(lat).arg(lng);
-        view->page()->runJavaScript(code);
-    }
-}
-
-void MapWnd::facebookAuth(bool)
+void MapWnd::facebookAuth()
 {
     fb->showAuthWindow();
     connect(fb, SIGNAL(completed()), SLOT(loadfriends()));
 }
 
+
 void MapWnd::loadfriends()
 {
     UserData tmp = fb->getUserData();
-    authButt->hide();
 
     QString code;
-    code =  QString("setProfile('%1', '%2');").arg(tmp.fullName).arg(tmp.photoLnk);
-    view->page()->runJavaScript(code);
+    code =  QString("setProfile('%1', '%2', '%3'); textDialog.dismiss ();").arg(tmp.fullName).arg(tmp.photoLnk).arg (tmp.user_id);
+    map->page()->runJavaScript(code);
 }

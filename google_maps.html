@@ -8,29 +8,13 @@
         
         <link rel="stylesheet" href="qrc:/css/main.css" type="text/css" />
 
+        <script type="text/javascript" src="qrc:/js/qwebchannel.js"></script>
         <script type="text/javascript"
 src="https://getfirebug.com/firebug-lite.js"></script>
-
-<script
-  src="https://code.jquery.com/jquery-3.2.1.min.js"
-  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-  crossorigin="anonymous"></script>
-
     </head>
 
     <body>
         <script type="text/javascript" src="qrc:/js/keen.js"></script>
-		
-		<div id="profile">
-		
-		<div id="avatar">
-			<img class='avimg' src="" width=50 height=50>
-		</div>
-		
-		<div id="name">
-		{name}
-		</div>
-		</div>
 		
         <div id="map"></div>
         <div id="overlay">
@@ -38,6 +22,17 @@ src="https://getfirebug.com/firebug-lite.js"></script>
                 <div id="dialog_body" unselectable="on"></div>
             </div>
         </div>
+
+        <table cellspacing="0" id="profile">
+            <tr>
+                <td>
+                    <img class="avimg" id="avimg" src=""
+                    width="50" height="50" />
+                </td>
+
+                <td id="name"></td>
+            </tr>
+        </table>
 
         <script type="text/javascript" src="qrc:/js/main.js"></script>
     </body>
