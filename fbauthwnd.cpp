@@ -25,7 +25,7 @@ void FBAuthWnd::finishLoading(bool)
     {
         url.remove("https://www.facebook.com/connect/login_success.html?code=");
         code = url;
-        qDebug()<<"recv code: "<<url;
+        //qDebug()<<"recv code: "<<url;
         emit sendCode(code);
         this->close();
     }

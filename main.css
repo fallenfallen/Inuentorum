@@ -89,6 +89,9 @@ button {
     display: none;
     padding: 3px 5px;
     margin: 0;
+	
+	-webkit-box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
+	box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
 }
 
 

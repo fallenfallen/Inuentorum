@@ -15,14 +15,19 @@ void Facebook::showAuthWindow()
     connect(FBwnd, SIGNAL(sendCode(QString)), SLOT(getCode(QString)));
 }
 
-UserData Facebook::getUserData()
+UserData Facebook::getUserData(QString id)
 {
     UserData inf;
-    inf.fullName = this->getUserName();
-    inf.user_id = this->getUserId();
-    inf.photoLnk = this->getUserPhoto();
 
-    qDebug()<<"USER PHOTO: "<<inf.photoLnk;
+    if(id=="me")
+        inf.user_id = this->getUserId();
+    else
+        inf.user_id = id;
+
+    inf.fullName = this->getUserName(id);
+    inf.photoLnk = this->getUserPhoto(id);
+
+    //qDebug()<<"USER PHOTO: "<<inf.photoLnk;
 
     return inf;
 }
@@ -87,9 +92,9 @@ QString Facebook::getUserId()
     return "";
 }
 
-QString Facebook::getUserName()
+QString Facebook::getUserName(QString id)
 {
-    QString reqStr = QString("https://graph.facebook.com/v2.8/me?access_token=%1").arg(tocken);
+    QString reqStr = QString("https://graph.facebook.com/v2.8/%1?access_token=%2").arg(id).arg(tocken);
     Request req;
     req.setAddress(reqStr);
     RequestSender* sender = new RequestSender(3500);
@@ -105,9 +110,9 @@ QString Facebook::getUserName()
     return "";
 }
 
-QString Facebook::getUserPhoto()
+QString Facebook::getUserPhoto(QString id)
 {
-    QString reqStr = QString("https://graph.facebook.com/me/picture?redirect=0&fields=url&access_token=%1").arg(tocken);
+    QString reqStr = QString("https://graph.facebook.com/%1/picture?redirect=0&fields=url&access_token=%2").arg(id).arg(tocken);
     Request req;
     req.setAddress(reqStr);
     RequestSender* sender = new RequestSender(3500);

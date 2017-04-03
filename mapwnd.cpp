@@ -23,15 +23,19 @@ MapWnd::~MapWnd()
 void MapWnd::facebookAuth()
 {
     fb->showAuthWindow();
-    connect(fb, SIGNAL(completed()), SLOT(loadfriends()));
+    connect(fb, SIGNAL(completed()), SLOT(onfbloggedIn()));
 }
 
 
-void MapWnd::loadfriends()
+void MapWnd::onfbloggedIn()
 {
     UserData tmp = fb->getUserData();
 
     QString code;
     code =  QString("setProfile('%1', '%2', '%3'); textDialog.dismiss ();").arg(tmp.fullName).arg(tmp.photoLnk).arg (tmp.user_id);
     map->page()->runJavaScript(code);
+
+    code =  QString("textDialog.show (tr('Hold on!'), tr ('You can place markers simply clicking on a place with right mouse button'), tr ('Got it!'))");
+    map->page()->runJavaScript(code);
+
 }

@@ -27,5 +27,5 @@ public:
 protected slots:
 
     void facebookAuth();
-    void loadfriends();
+    void onfbloggedIn();
 };

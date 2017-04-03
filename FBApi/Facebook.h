@@ -19,10 +19,9 @@ class Facebook: public QObject
 public:
     Facebook(QString _app_id, QString _app_secret);
     void showAuthWindow();
-    UserData getUserData();
+    UserData getUserData(QString id = "me");
     bool isAuth();
     void logout();
-
 protected slots:
     void getCode(QString);
 
@@ -31,8 +30,8 @@ signals:
 
 private:
     QString getUserId();
-    QString getUserName();
-    QString getUserPhoto();
+    QString getUserName(QString id);
+    QString getUserPhoto(QString id);
     QString app_id;
     QString app_secret;
     QString tocken;
