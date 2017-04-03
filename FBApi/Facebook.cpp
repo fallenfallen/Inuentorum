@@ -51,20 +51,22 @@ void Facebook::getTocken()
     RequestSender* sender = new RequestSender(3500);
     QByteArray response = sender->get(req);
 
-    qDebug()<<"[getTocken] tocken:"<<response;
-
-    QJsonDocument doc = QJsonDocument::fromJson(response);
-    QJsonObject jsonObject = doc.object();
-    QJsonObject::iterator itr = jsonObject.find("access_token");
-    tocken = itr.value().toString();
-    this->authFlag = true;
-    emit completed();
+    //qDebug()<<"[getTocken] tocken:"<<response;
+    if(response!="")
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject jsonObject = doc.object();
+        QJsonObject::iterator itr = jsonObject.find("access_token");
+        tocken = itr.value().toString();
+        this->authFlag = true;
+        emit completed();
+    }
 }
 
 void Facebook::getCode(QString t)
 {
     code = t;
-    qDebug()<<"[getCode func] code:"<<code;
+    //qDebug()<<"[getCode func] code:"<<code;
     getTocken();
 }
 
@@ -75,10 +77,14 @@ QString Facebook::getUserId()
     req.setAddress(reqStr);
     RequestSender* sender = new RequestSender(3500);
     QByteArray response = sender->get(req);
+    if(response!="")
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject jsonObject = doc.object();
+        return jsonObject.find("id").value().toString();
+    }
 
-    QJsonDocument doc = QJsonDocument::fromJson(response);
-    QJsonObject jsonObject = doc.object();
-    return jsonObject.find("id").value().toString();
+    return "";
 }
 
 QString Facebook::getUserName()
@@ -89,9 +95,14 @@ QString Facebook::getUserName()
     RequestSender* sender = new RequestSender(3500);
     QByteArray response = sender->get(req);
 
-    QJsonDocument doc = QJsonDocument::fromJson(response);
-    QJsonObject jsonObject = doc.object();
-    return jsonObject.find("name").value().toString();
+    if(response!="")
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject jsonObject = doc.object();
+        return jsonObject.find("name").value().toString();
+    }
+
+    return "";
 }
 
 QString Facebook::getUserPhoto()
@@ -102,7 +113,12 @@ QString Facebook::getUserPhoto()
     RequestSender* sender = new RequestSender(3500);
     QByteArray response = sender->get(req);
 
-    QJsonDocument doc = QJsonDocument::fromJson(response);
-    QJsonObject jsonObject = doc.object();
-    return jsonObject.find("data").value().toObject().find("url").value().toString();
+    if(response!="")
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject jsonObject = doc.object();
+        return jsonObject.find("data").value().toObject().find("url").value().toString();
+    }
+
+    return "";
 }
