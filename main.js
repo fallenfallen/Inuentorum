@@ -375,18 +375,69 @@ function loginFacebook () {
 }
 
 
+var map;
+var markers = [];
+var infoWindows = [];
+
+
+function loadMarkers()
+{
+	    Keen.ajax.get ("http://dev2.gditeck.com/getInfo.php", null, {
+        onSuccess: function (data) {
+            Keen.log (data);
+            if (!data ) {
+                return;
+            }
+            for(i=0; i<data.length; i++)
+			{
+				var pos = {lat: parseFloat(data[i]['lat']), lng: parseFloat(data[i]['lng'])};
+				var contentString = '<div id="content">'+
+				  '<div id="siteNotice"></div>'+
+				  '<h1 id="firstHeading" class="firstHeading">'+data[i]['title']+'</h1>'+
+				  '<div id="bodyContent">'+
+				  '<p>'+data[i]['message']+'</p>'+
+				  '</div>'+
+				  '</div>';
+				  
+				var infowindow = new google.maps.InfoWindow({
+				content: contentString
+				});
+				
+				infoWindows.push(infowindow);
+
+			  var marker = new google.maps.Marker({
+				position: pos,
+				map: map,
+				title: 'Uluru (Ayers Rock)'
+			  });
+			  
+			  markers.push(marker);
+			  
+			  markers[i].addListener('click', function() {
+				infoWindows[i].open(map, markers[i]);
+			  });
+			  
+			}
+        }
+    });
+}
+
 function init () {
     var options = {
         center: {
-            lat: 47.845502,
-            lng: 35.053543
+            lat: 47.819363,
+            lng: 35.153075
         },
-        zoom: 18,
+        zoom: 11,
         mapTypeId: google.maps.MapTypeId.HYBRID,
     };
 	
 
     map = new google.maps.Map (document.getElementById ("map"), options);
+	
+ 
+	loadMarkers();
+	
 	
     google.maps.event.addListener(map, "rightclick", function(event) {
         var running = false;
@@ -420,6 +471,7 @@ function init () {
                     textDialog.show (tr ("Thank you!"),
                         tr ("For your commitment in our services"),
                         tr ("You're welcome"));
+						loadMarkers();
                 },
 
                 onFail: function () {
@@ -457,12 +509,16 @@ function init () {
     });
     */
 
+	
     textDialog.show (tr ("Who are you?"),
         tr ("Please, login via Facebook in order " +
             "to use full service's features"), tr ("Login"), loginFacebook);
 
     initiated = true;
 
+	Keen.hide (overlay);
+	
+	
     /* 
     Keen.ajax.get ("http://ipinfo.io/geo", null, {
         onSuccess: function (data) {
