@@ -341,7 +341,7 @@ MarkerDialog.prototype = {
         }
 
         if (!message) {
-            Keen.Fx.poke (this.nameEl, { backgroundColor: "#EAB1AA" });
+            Keen.Fx.poke (this.messageEl, { backgroundColor: "#EAB1AA" });
         }
 
         if (name && message) {
