@@ -224,11 +224,18 @@ function init () {
 
     map = new google.maps.Map (document.getElementById ("map"), options);
 	
+	//get point
 	google.maps.event.addListener(map, "rightclick", function(event) {
 		var lat = event.latLng.lat();
 		var lng = event.latLng.lng();
-		// populate yor box/field with lat, lng
 		console.log("Lat=" + lat + "; Lng=" + lng);
+		
+		Keen.ajax.get ("http://dev2.gditeck.com/register.php?user_id=1&lat="+lat+"&lng="+lng+"&title=test&message=mess", null, {
+        onSuccess: function (data) {
+            Keen.log (data);
+        }
+    });
+		
 	});
 	
 	
