@@ -8,11 +8,11 @@ MapWnd::MapWnd(const QUrl& url)
     view->load(QUrl("qrc:/html/google_maps.html"));
     connect(view, SIGNAL(loadFinished(bool)), SLOT(finishLoading(bool)));
 
-    QPushButton* butt = new QPushButton(this);
-    butt->setText("Login with facebook");\
-    butt->setGeometry(this->width(), 0, 150, 40);
+    authButt = new QPushButton(this);
+    authButt->setText("Login with facebook");\
+    authButt->setGeometry(this->width(), 0, 150, 40);
     //butt->move(100, 100);
-    connect(butt, SIGNAL(clicked(bool)), SLOT(facebookAuth(bool)));
+    connect(authButt, SIGNAL(clicked(bool)), SLOT(facebookAuth(bool)));
 
     fb = new Facebook("1808955962713438", "093350c2fe425997e271b3ccf323f5b90");
 
@@ -28,7 +28,7 @@ MapWnd::~MapWnd()
 
 void MapWnd::finishLoading(bool)
 {
-    findLocation();
+    //findLocation();
 }
 
 void MapWnd::findLocation()
@@ -66,6 +66,9 @@ void MapWnd::facebookAuth(bool)
 void MapWnd::loadfriends()
 {
     UserData tmp = fb->getUserData();
-    qDebug()<<tmp.fullName;
-    qDebug()<<tmp.photoLnk;
+    authButt->hide();
+
+    QString code;
+    code =  QString("setProfile('%1', '%2');").arg(tmp.fullName).arg(tmp.photoLnk);
+    view->page()->runJavaScript(code);
 }

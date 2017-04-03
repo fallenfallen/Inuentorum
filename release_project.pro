@@ -24,6 +24,7 @@ OTHER_FILES += \
     google_maps.html
     qwebchannel.js
 
+
 RESOURCES += \
     res.qrc
 

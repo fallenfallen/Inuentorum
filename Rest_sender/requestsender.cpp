@@ -64,13 +64,6 @@
                 QNetworkReply* reply = getRequest ? manager->get(request.request()) :
                                                                                         manager->post(request.request(false), request.data());
 
-#if defined(NETWORK_SHOW_SEND_REQUESTS)
-                if (getRequest)
-                        qDebug() << "[GET] " <<  request.request().url().toString();
-                else
-                        qDebug() << "[POST]" << request.request(false).url().toString() << request.data();
-#endif
-
                 QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
                 QObject::connect(&timer, &QTimer::timeout, reply, &QNetworkReply::abort);
 
@@ -90,9 +83,6 @@
                 }
 
                 reply->deleteLater();
-
-
-                qDebug() << "[ANSWER]" << data;
 
                 return data;
         }

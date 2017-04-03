@@ -1,10 +1,14 @@
 <RCC>
     <qresource prefix="/html">
         <file>google_maps.html</file>
-        <file>qwebchannel.js</file>
         <file>test.html</file>
     </qresource>
-    <qresource prefix="/qtwebchannel">
+    <qresource prefix="/js">
+        <file>keen.js</file>
+        <file>main.js</file>
         <file>qwebchannel.js</file>
+    </qresource>
+    <qresource prefix="/css">
+        <file>main.css</file>
     </qresource>
 </RCC>

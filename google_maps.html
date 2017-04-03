@@ -1,32 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <style type="text/css">
-      html { height: 100% }
-      body { height: 100%; margin: 0; padding: 0 }
-      #map_canvas { height: 100% }
-    </style>
-    <script type="text/javascript"
-      src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCnu1OB9AyyaDeX77dhkl26lbgcRVKHufA&sensor=false">
-    </script>
-    <script type="text/javascript">
-      var map;
-      var markers = [];
+    
+    <!-- Explicit head tag is indispensable -->
 
-      function initialize() {
-        var myOptions = {
-          center: new google.maps.LatLng(47.8833, -35345.0833),
-          zoom: 8,
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-          panControl: true
-        };
-        map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-      }
-    </script>
-  </head>
-  <body onload="initialize()">
-    <div id="map_canvas" style="width:100%; height:100%"></div>
-  </body>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        
+        <link rel="stylesheet" href="qrc:/css/main.css" type="text/css" />
+
+        <script type="text/javascript"
+src="https://getfirebug.com/firebug-lite.js"></script>
+
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
+    </head>
+
+    <body>
+        <script type="text/javascript" src="qrc:/js/keen.js"></script>
+		
+		<div id="profile">
+		
+		<div id="avatar">
+			<img class='avimg' src="" width=50 height=50>
+		</div>
+		
+		<div id="name">
+		{name}
+		</div>
+		</div>
+		
+        <div id="map"></div>
+        <div id="overlay">
+            <div id="dialog">
+                <div id="dialog_body" unselectable="on"></div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="qrc:/js/main.js"></script>
+    </body>
 </html>
 

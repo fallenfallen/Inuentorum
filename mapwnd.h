@@ -27,4 +27,5 @@ protected slots:
 private:
     QWebEngineView *view;
     Facebook* fb;
+    QPushButton* authButt;
 };
