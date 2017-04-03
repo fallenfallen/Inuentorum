@@ -265,7 +265,7 @@ function init () {
 
     initiated = true;
     textDialog.dismiss ();
-	
+	//Because of this shit sleep all window ¯ \ _ (ツ) _ / ¯
 /*
     Keen.ajax.get ("http://ipinfo.io/geo", null, {
         onSuccess: function (data) {
