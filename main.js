@@ -376,48 +376,54 @@ function loginFacebook () {
 
 
 var map;
-var markers = [];
-var infoWindows = [];
+var lastInfoWindow = null;
 
 
 function loadMarkers()
 {
-	    Keen.ajax.get ("http://dev2.gditeck.com/getInfo.php", null, {
+    Keen.ajax.get ("http://dev2.gditeck.com/getInfo.php", null, {
         onSuccess: function (data) {
             Keen.log (data);
-            if (!data ) {
+
+            if (!data) {
                 return;
             }
-            for(i=0; i<data.length; i++)
-			{
-				var pos = {lat: parseFloat(data[i]['lat']), lng: parseFloat(data[i]['lng'])};
-				var contentString = '<div id="content">'+
-				  '<div id="siteNotice"></div>'+
-				  '<h1 id="firstHeading" class="firstHeading">'+data[i]['title']+'</h1>'+
-				  '<div id="bodyContent">'+
-				  '<p>'+data[i]['message']+'</p>'+
-				  '</div>'+
-				  '</div>';
-				  
-				var infowindow = new google.maps.InfoWindow({
-				content: contentString
-				});
-				
-				infoWindows.push(infowindow);
 
-			  var marker = new google.maps.Marker({
-				position: pos,
-				map: map,
-				title: 'Uluru (Ayers Rock)'
-			  });
-			  
-			  markers.push(marker);
-			  
-			  markers[i].addListener('click', function() {
-				infoWindows[i].open(map, markers[i]);
-			  });
-			  
-			}
+            Keen.each (data, function (k, v) {
+                var pos = {
+                    lat: parseFloat(v.lat),
+                    lng: parseFloat(v.lng)
+                };
+
+                var contentString =
+                    '<div id="content">'+
+                    '<div id="siteNotice"></div>'+
+                    '<h1 id="firstHeading" class="firstHeading">' +
+                    v.title + '</h1>'+
+                    '<div id="bodyContent">'+
+                    '<p>' + v.message +'</p>'+
+                    '</div>'+
+                    '</div>';
+
+                var infoWindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+
+                var marker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    title: v.title
+                });
+
+                marker.addListener ('click', function (event) {
+                    if (lastInfoWindow) {
+                        lastInfoWindow.close ();
+                    }
+
+                    lastInfoWindow = infoWindow;
+                    infoWindow.open (map, marker);
+                });
+            });
         }
     });
 }
@@ -436,7 +442,7 @@ function init () {
     map = new google.maps.Map (document.getElementById ("map"), options);
 	
  
-	loadMarkers();
+    loadMarkers();
 	
 	
     google.maps.event.addListener(map, "rightclick", function(event) {
@@ -516,9 +522,6 @@ function init () {
 
     initiated = true;
 
-	Keen.hide (overlay);
-	
-	
     /* 
     Keen.ajax.get ("http://ipinfo.io/geo", null, {
         onSuccess: function (data) {

@@ -15,6 +15,8 @@ FBAuthWnd::FBAuthWnd()
     setCentralWidget(wview);
     wview->setFixedWidth(450);
     wview->setFixedHeight(400);
+
+    setWindowTitle (QStringLiteral ("Facebook Auth"));
 }
 
 
