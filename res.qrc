@@ -10,4 +10,12 @@
     <qresource prefix="/css">
         <file>main.css</file>
     </qresource>
+    <qresource prefix="/img">
+        <file>unknown.jpg</file>
+        <file>marker0.png</file>
+        <file>marker1.png</file>
+        <file>marker2.png</file>
+        <file>marker3.png</file>
+        <file>marker4.png</file>
+    </qresource>
 </RCC>

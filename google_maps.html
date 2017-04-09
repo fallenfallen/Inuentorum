@@ -17,13 +17,13 @@ src="https://getfirebug.com/firebug-lite.js"></script>
         <script type="text/javascript" src="qrc:/js/keen.js"></script>
 		
         <div id="map"></div>
-        <div id="overlay">
-            <div id="dialog">
-                <div id="dialog_body" unselectable="on"></div>
-            </div>
-        </div>
 
-        <table cellspacing="0" id="profile">
+        <table id="categories_wrapper" cellspacing="0">
+            <tbody id="categories">
+            </tbody>
+        </table>
+
+        <table id="profile" cellspacing="0" cellpadding="1ch">
             <tr>
                 <td>
                     <img class="avimg" id="avimg" src=""
@@ -33,6 +33,12 @@ src="https://getfirebug.com/firebug-lite.js"></script>
                 <td id="name"></td>
             </tr>
         </table>
+
+        <div id="overlay">
+            <div id="dialog">
+                <div id="dialog_body" unselectable="on"></div>
+            </div>
+        </div>
 
         <script type="text/javascript" src="qrc:/js/main.js"></script>
     </body>

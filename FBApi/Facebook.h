@@ -17,6 +17,8 @@ class Facebook: public QObject
 {
     Q_OBJECT
 public:
+    QString tocken;
+
     Facebook(QString _app_id, QString _app_secret);
     void showAuthWindow();
     UserData getUserData(QString id = "me");
@@ -34,7 +36,6 @@ private:
     QString getUserPhoto(QString id);
     QString app_id;
     QString app_secret;
-    QString tocken;
     QString code;
     bool authFlag;
     FBAuthWnd* FBwnd;

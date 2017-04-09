@@ -3,7 +3,6 @@
 #include <QNetworkReply>
 #include "Rest_sender/request.h"
 #include "Rest_sender/requestsender.h"
-#include "FBApi/Facebook.h"
 #include "umap.h"
 
 
@@ -16,7 +15,6 @@ class MapWnd : public QMainWindow
     Q_OBJECT
 
     UMap *map;
-    Facebook* fb;
 
 
 public:

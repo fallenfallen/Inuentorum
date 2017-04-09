@@ -41,7 +41,7 @@ body {
     height: 100%;
     position: absolute;
     top: 0;
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, 0.15);
 }
 
 
@@ -66,16 +66,17 @@ body {
 
 
 button {
-    width: 100%;
+    min-width: 60px;
     height: 34px;
     padding: 0 24px;
     text-align: center;
     background-color: #E4E4E4;
     color: #000;
     cursor: pointer;
-    display: block;
+    display: inline;
     outline: none;
     border: 1px solid #c3cdb6;
+    margin-left: 10px;
 }
 
 
@@ -85,13 +86,13 @@ button {
     top: 0;
     width: 200px;
     height: 50px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.65);
     display: none;
-    padding: 3px 5px;
+    padding: 1ch 2ch;
     margin: 0;
 	
-	-webkit-box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
-	box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
+    -webkit-box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
+    box-shadow: -1px 1px 2px 1px rgba(0,0,0,0.1);
 }
 
 
@@ -102,4 +103,43 @@ button {
 
 img {
     display: block;
+}
+
+
+#categories_wrapper {
+    min-width: 10%;
+    padding: 10px;
+    position: absolute;
+
+    top: 50%;
+    max-height: 20px;
+    left: 0;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.65);
+
+    display: none;
+}
+
+
+#categories_wrapper td {
+    color: #FFF;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+
+.active_category {
+    background-color: #000;
+}
+
+
+#categories_wrapper td:hover {
+    background-color: #000;
+}
+
+
+.urgency {
+    width: 100%;
+    height: 1ch;
+    margin-top: 1ch;
 }

@@ -7,7 +7,15 @@ var initiated = false;
 var textDialog, gApiScript, markerDialog;
 var overlayEl = Ki ("overlay");
 var dialogBody = Ki ("dialog_body");
-var facebookId;
+var facebook = null;
+var doneCategories = false;
+var shownCatDialog = false;
+var markers = [];
+var categoriesSelectEl = Keen.createElement ("select");
+var committingMarker = false;
+var urgencyColors = [ "#30e31d", "#a9e31d", "#e3e11d", "#f6d912", "#f61212" ];
+var prevCategoryEl = null;
+var categoryCellEls = [];
 
 
 var TextDialog = function (dialogEl) {
@@ -15,6 +23,7 @@ var TextDialog = function (dialogEl) {
     this.titleEl = Keen.createElement ("h1");
     this.textEl = Keen.createElement ("p");
     this.btnEl = Keen.createElement ("button");
+    this.btn2El = Keen.createElement ("button");
 
     Keen.class.add (this.titleEl, "title");
     Keen.class.add (this.textEl, "text");
@@ -30,10 +39,22 @@ var TextDialog = function (dialogEl) {
             dialog.dismiss ();
         }
     });
+
+    Keen.data (this.btn2El, "text_dialog", this);
+
+    Keen.event.add (this.btn2El, "click", function (event) {
+        var dialog = Keen.data (event.target, "text_dialog");
+
+        if (dialog.callback2) {
+            dialog.callback2 (dialog, event);
+        } else {
+            dialog.dismiss ();
+        }
+    });
 };
 
 TextDialog.prototype = {
-    show: function (title, text, btnText, callback) {
+   show: function (title, text, btnText, callback, btn2Text, callback2) {
         var dialog = Keen.data (this.dialogEl, "dialog");
 
         if (dialog !== this && dialog) {
@@ -43,6 +64,13 @@ TextDialog.prototype = {
         this.titleEl.textContent = title;
         this.textEl.textContent = text;
 
+        if (dialog !== this || !dialog) {
+            this.dialogEl.appendChild (this.titleEl);
+            this.dialogEl.appendChild (this.textEl);
+            this.dialogEl.appendChild (this.btnEl);
+            this.dialogEl.appendChild (this.btn2El);
+        }
+
         if (btnText) {
             this.callback = callback;
             this.btnEl.textContent = btnText;
@@ -51,10 +79,13 @@ TextDialog.prototype = {
             Keen.hide (this.btnEl);
         }
 
-        if (dialog !== this || !dialog) {
-            this.dialogEl.appendChild (this.titleEl);
-            this.dialogEl.appendChild (this.textEl);
-            this.dialogEl.appendChild (this.btnEl);
+        if (btn2Text) {
+            this.callback2 = callback2;
+            this.btn2El.textContent = btn2Text;
+
+            Keen.show (this.btn2El);
+        } else {
+            Keen.hide (this.btn2El);
         }
 
         Keen.data (this.dialogEl, "dialog", this);
@@ -71,6 +102,7 @@ TextDialog.prototype = {
         this.dialogEl.removeChild (this.titleEl);
         this.dialogEl.removeChild (this.textEl);
         this.dialogEl.removeChild (this.btnEl);
+        this.dialogEl.removeChild (this.btn2El);
 
         Keen.clean (this.dialogEl, "dialog");
     },
@@ -84,6 +116,8 @@ TextDialog.prototype = {
     }
 };
 
+
+/* Garbage begins */
 
 var PollBikeDialog = function (dialogEl) {
     this.dialogEl = dialogEl;
@@ -236,6 +270,8 @@ PollBikeDialog.prototype = {
     }
 };
 
+/* Garbage ends */
+
 
 var MarkerDialog = function (dialogEl) {
     this.dialogEl = dialogEl;
@@ -264,6 +300,19 @@ var MarkerDialog = function (dialogEl) {
         tableEl.appendChild (line);
     }
 
+    addRow (categoriesSelectEl, "Category");
+
+
+    this.urgencyEl = Keen.createElement ("select");
+
+    for (var i = 0; i <= 4; i++) {
+        this.urgencyEl.innerHTML +=
+            '<option value="' + i + '">' + i + '</option>';
+    }
+
+    addRow (this.urgencyEl, "Urgency");
+
+
     this.nameEl = Keen.createElement ("input", {
         type: "text"
     });
@@ -280,32 +329,25 @@ var MarkerDialog = function (dialogEl) {
 
     var line = Keen.createElement ("tr");
     var cell = Keen.createElement ("td");
-    var button = Keen.createElement ("button");
-    this.btnEl = button;
+    this.btnEl = Keen.createElement ("button");
 
-    Keen.data (button, "marker_dialog", this);
+    Keen.data (this.btnEl, "marker_dialog", this);
 
-    Keen.event.add (button, "click", function (event) {
+    Keen.event.add (this.btnEl, "click", function (event) {
         Keen.data (event.target, "marker_dialog").done ();
     });
 
-    button.textContent = tr ("Post");
-    cell.appendChild (button);
-    line.appendChild (cell);
+    this.btnEl.textContent = tr ("Post");
 
-    button = Keen.createElement ("button");
-    Keen.data (button, "marker_dialog", this);
+    this.btn2El = Keen.createElement ("button");
 
-    Keen.event.add (button, "click", function (event) {
+    Keen.data (this.btn2El, "marker_dialog", this);
+
+    Keen.event.add (this.btn2El, "click", function (event) {
         Keen.data (event.target, "marker_dialog").dismiss ();
     });
 
-    button.textContent = tr ("Cancel");
-
-    cell = Keen.createElement ("td");
-    cell.appendChild (button);
-    line.appendChild (cell);
-    tableEl.appendChild (line);
+    this.btn2El.textContent = tr ("Cancel");
 };
 
 
@@ -321,10 +363,14 @@ MarkerDialog.prototype = {
 
         this.nameEl.value = "";
         this.messageEl.value = "";
+        this.urgencyEl.selectedIndex = 0;
+        categoriesSelectEl.selectedIndex = 0;
 
         if (dialog !== this || !dialog) {
             this.dialogEl.appendChild (this.titleEl);
             this.dialogEl.appendChild (this.tableEl);
+            this.dialogEl.appendChild (this.btnEl);
+            this.dialogEl.appendChild (this.btn2El);
         }
 
         Keen.data (this.dialogEl, "dialog", this);
@@ -340,6 +386,8 @@ MarkerDialog.prototype = {
 
         this.dialogEl.removeChild (this.titleEl);
         this.dialogEl.removeChild (this.tableEl);
+        this.dialogEl.removeChild (this.btnEl);
+        this.dialogEl.removeChild (this.btn2El);
 
         Keen.clean (this.dialogEl, "dialog");
     },
@@ -357,7 +405,13 @@ MarkerDialog.prototype = {
         }
 
         if (name && message) {
-            this.callback (this, name, message);
+            this.callback (this, {
+                name: name,
+                message: message,
+                urgency: this.urgencyEl.selectedIndex,
+                category: categoriesSelectEl.options [
+                    categoriesSelectEl.selectedIndex].value
+            });
         }
     }
 };
@@ -376,64 +430,243 @@ function loginFacebook () {
 
 
 var map;
-var markersHashTable = {};
-var lastInfoWindow = null;
+var infoWindow;
 
 
-function loadMarkers()
-{
-    Keen.ajax.get ("http://dev2.gditeck.com/getInfo.php", null, {
+function retryGetUserData (id, nameId, avatarId) {
+    Keen.ajax.post ("https://graph.facebook.com/v2.8/" +
+        v.user_id + "?access_token=" + facebook.token, {}, {
+        onSuccess: function (data) {
+            Keen.log (data);
+        },
+        onFail: function () {
+            setTimeout (function () {
+                retryGetUserData (id, nameId, avatarId);
+            }, 5000);
+        }
+    });
+}
+
+
+function deleteMarker (id) {
+    Keen.ajax.post ("http://dev2.gditeck.com/getInfo.php", {
+        act: "delete",
+        id: id
+    }, {});
+
+    textDialog.show (tr ("Delete ..."), tr ("Your marker will be" +
+        "removed later."), tr ("Got It!"));
+}
+
+
+function markerClicked () {
+    var v = Keen.data (this, "marker");
+
+    var cache = facebook.cache [v.user_id];
+
+    var nameId = "", avatarId = "";
+
+    if (!cache) {
+        cache = {
+            id: v.user_id,
+            img: "qrc:/img/unknown.jpg",
+            name: tr ("Unknown")
+        };
+
+        nameId = "name_" + v.id;
+        avatarId = "avatar" + v.id;
+
+        retryGetUserData (v.user_id, nameId, avatarId);
+    }
+
+    infoWindow.close ();
+
+    var content =
+        "<table><tr>" +
+            '<td><img id="' + avatarId +
+            '" width="50" height="50" class="avimg" '+
+            'src="' + cache.img + '" /></td>' +
+            '<td id="' + nameId + '">' + cache.name + '</td>' +
+        '</tr></table>' +
+
+        '<div style="background-color: ' + urgencyColors [v.urgency] +
+        ';" class="urgency"></div>' +
+
+        '<div id="content">'+
+        '<div id="siteNotice"></div>'+
+        '<h1 id="firstHeading" class="firstHeading">' +
+        v.title + '</h1>'+
+        '<p style="color: #A0A0A0;">' + tr ("Posted at ") +
+        (new Date (v.time * 1000)).toLocaleString () + '</p>' +
+        '<div id="bodyContent">'+
+        '<p>' + v.message +'</p>'+
+        '</div>'+
+        '</div>';
+
+    if (v.user_id == facebook.id) {
+        content += '<a href="#' + (+new Date).toString (16) +
+            '" style="float: right;" ' +
+            'onclick="deleteMarker (' + v.id + ')">' +
+        tr ("Delete") + '</a>';
+    }
+
+    infoWindow.setContent (content);
+    infoWindow.open (map, this);
+}
+
+
+function loadMarker (v) {
+    marker = new google.maps.Marker ();
+    marker.addListener ("click", markerClicked);
+
+    Keen.data (marker, "marker", v);
+
+    marker.setPosition ({
+        lat: parseFloat (v.lat),
+        lng: parseFloat (v.lng)
+    });
+
+    marker.setTitle (v.title);
+    marker.setMap (map);
+    marker.setIcon ("qrc:/img/marker" + v.urgency + ".png");
+
+    markers.push (marker);
+}
+
+
+function loadMarkers (category, el) {
+    textDialog.show (tr ("Please, wait ..."),
+                    tr ("We're loading markers ..."));
+
+    Keen.ajax.post ("http://dev2.gditeck.com/getInfo.php", {
+        act: "coordinates",
+        category: category
+    }, {
         onSuccess: function (data) {
             Keen.log (data);
 
             if (!data) {
+                textDialog.show (tr ("Sorry ..."),
+                    tr ("We have failed to obtain markers data."),
+                    tr ("Ok"));
+
                 return;
             }
 
-            Keen.each (data, function (k, v) {
-                if (markersHashTable [v.id]) {
-                    return;
-                }
-
-                markersHashTable [v.id] = true;
-
-                var pos = {
-                    lat: parseFloat(v.lat),
-                    lng: parseFloat(v.lng)
-                };
-
-                var contentString =
-                    '<div id="content">'+
-                    '<div id="siteNotice"></div>'+
-                    '<h1 id="firstHeading" class="firstHeading">' +
-                    v.title + '</h1>'+
-                    '<div id="bodyContent">'+
-                    '<p>' + v.message +'</p>'+
-                    '</div>'+
-                    '</div>';
-
-                var infoWindow = new google.maps.InfoWindow({
-                    content: contentString
-                });
-
-                var marker = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    title: v.title
-                });
-
-                marker.addListener ('click', function (event) {
-                    if (lastInfoWindow) {
-                        lastInfoWindow.close ();
-                    }
-
-                    lastInfoWindow = infoWindow;
-                    infoWindow.open (map, marker);
-                });
+            Keen.each (markers, function (k, v) {
+                v.setMap (null);
             });
+
+            Keen.each (data, function (k, v) {
+                loadMarker (v);
+            });
+
+            textDialog.dismiss ();
+
+            if (prevCategoryEl !== null) {
+                Keen.class.remove (prevCategoryEl, "active_category");
+            }
+
+            prevCategoryEl = el;
+            Keen.class.add (el, "active_category");
+        },
+        onFail: function () {
+            textDialog.show (tr ("Sorry ..."),
+                tr ("We have failed to obtain markers data."),
+                tr ("Ok"));
         }
     });
 }
+
+
+function commitMarker (latLng) {
+    markerDialog.show (function (dialog, v) {
+        if (committingMarker) {
+            return;
+        }
+
+        committingMarker = true;
+        
+        Keen.toggle (dialog.nameEl);
+        Keen.toggle (dialog.messageEl);
+        Keen.toggle (dialog.btnEl);
+
+        Keen.ajax.post ("http://dev2.gditeck.com/register.php", {
+            user_id: facebook.id,
+            lat: latLng.lat,
+            lng: latLng.lng,
+            title: v.name,
+            message: v.message,
+            urgency: v.urgency,
+            category: v.category
+        }, {
+            onSuccess: function () {
+                committingMarker = false;
+
+                Keen.toggle (dialog.nameEl);
+                Keen.toggle (dialog.messageEl);
+                Keen.toggle (dialog.btnEl);
+
+                loadMarkers (v.category,
+                    categoryCellEls [categoriesSelectEl.selectedIndex]);
+            },
+
+            onFail: function () {
+                committingMarker = false;
+
+                Keen.toggle (dialog.nameEl);
+                Keen.toggle (dialog.messageEl);
+                Keen.toggle (dialog.btnEl);
+
+                textDialog.show (tr ("Sorry!"),
+                        tr ("We were unable to send your marker"),
+                        tr ("OK"));
+            }
+        });
+    });
+}
+
+
+function retryCategories () {
+    Keen.ajax.post ("http://dev2.gditeck.com/getInfo.php", {
+        act: "categories"
+    }, {
+        onSuccess: function (data) {
+            var categoriesEl = Ki ("categories");
+
+            Keen.each (data, function (k, v) {
+                var line = Keen.createElement ("tr");
+                var cell = Keen.createElement ("td");
+
+                Keen.event.add (cell, "click", function () {
+                    loadMarkers (v.id, cell);
+                });
+
+                cell.textContent = tr (v.name);
+                line.appendChild (cell);
+                categoriesEl.appendChild (line);
+
+                categoriesSelectEl.innerHTML +=
+                    '<option value="' + v.id + '">' + v.name + '</option>';
+
+                categoryCellEls.push (cell);
+            });
+
+            Keen.show (Ki ("categories_wrapper"));
+
+            doneCategories = true;
+
+            if (shownCatDialog) {
+                textDialog.dismiss ();
+            }
+        },
+        
+        onFail: function () {
+            setTimeout (retryCategories, 5000);
+        }
+    });
+}
+
 
 function init () {
     var options = {
@@ -447,59 +680,15 @@ function init () {
 	
 
     map = new google.maps.Map (document.getElementById ("map"), options);
-	
  
-    loadMarkers();
-	
-	
-    google.maps.event.addListener(map, "rightclick", function(event) {
-        var running = false;
-        var lat = event.latLng.lat();
-        var lng = event.latLng.lng();
-
-        markerDialog.show (function (dialog, name, message) {
-            Keen.log ("show");
-            if (running) {
-                return;
-            }
-
-            running = true;
-
-            Keen.toggle (dialog.nameEl);
-            Keen.toggle (dialog.messageEl);
-            Keen.toggle (dialog.btnEl);
-
-            Keen.ajax.post ("http://dev2.gditeck.com/register.php", {
-                user_id: facebookId,
-                lat: event.latLng.lat (),
-                lng: event.latLng.lng (),
-                title: name,
-                message: message
-            }, {
-                onSuccess: function () {
-                    Keen.toggle (dialog.nameEl);
-                    Keen.toggle (dialog.messageEl);
-                    Keen.toggle (dialog.btnEl);
-
-                    textDialog.show (tr ("Thank you!"),
-                        tr ("For your commitment in our services"),
-                        tr ("You're welcome"));
-
-                    loadMarkers();
-                },
-
-                onFail: function () {
-                    Keen.toggle (dialog.nameEl);
-                    Keen.toggle (dialog.messageEl);
-                    Keen.toggle (dialog.btnEl);
-
-                    textDialog.show (tr ("Sorry!"),
-                        tr ("We wasn't able to send your marker"),
-                        tr ("OK"));
-                }
-            });
+    google.maps.event.addListener(map, "rightclick", function (event) {
+        commitMarker ({
+            lat: event.latLng.lat (),
+            lng: event.latLng.lng ()
         });
     });
+
+    infoWindow = new google.maps.InfoWindow ();
 
     /*
      * Download up-to-date KML files.
@@ -524,11 +713,21 @@ function init () {
     */
 
 	
+    /* 
     textDialog.show (tr ("Who are you?"),
         tr ("Please, login via Facebook in order " +
             "to use full service's features"), tr ("Login"), loginFacebook);
+            */
 
     initiated = true;
+
+    retryCategories ();
+
+    textDialog.show (tr ("Who are you?"),
+                tr ("Please, login via Facebook in order " +
+                    "to use full service's features"),
+                tr ("Login"), loginFacebook);
+
 
     /* 
     Keen.ajax.get ("http://ipinfo.io/geo", null, {
@@ -575,11 +774,43 @@ function retry () {
     }
 }
 
-function setProfile(name, img, id) {
+
+/*
+ * Called on successful facebook auth
+ */
+
+function setProfile (name, img, id, token) {
     Ki ("name").textContent = name;
     Ki ("avimg").setAttribute ("src", img);
     Keen.show (Ki ("profile"));
-    facebookId = id;
+    facebook = {
+        id: id,
+        token: token,
+        cache: {}
+    };
+
+    facebook.cache [id] = {
+        id: id,
+        img: img,
+        name: name
+    };
+
+    textDialog.show (tr('Hold on!'),
+        tr ('You can place markers simply by clicking ' +
+             'on a place with right mouse button.' +
+             'Choose a category in the left bar to see appropriate markers'),
+        tr ('Got it!'), function (dialog) {
+        
+        if (doneCategories) {
+            dialog.dismiss ();
+            return;
+        }
+        
+        shownCatDialog = true;
+
+        textDialog.show (tr ("Please, wait ..."),
+            tr ("We're fetching some data ..."));
+    });
 }
 
 

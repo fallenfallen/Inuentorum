@@ -3,6 +3,7 @@
 
 
 #include <QObject>
+#include "FBApi/Facebook.h"
 
 
 class UQt : public QObject
@@ -13,7 +14,11 @@ class UQt : public QObject
 
 
 public:
+
+    Facebook* fb;
+
     explicit UQt (QObject *parent = Q_NULLPTR);
+    ~UQt ();
 
 
 signals:
