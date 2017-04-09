@@ -433,15 +433,42 @@ var map;
 var infoWindow;
 
 
-function retryGetUserData (id, nameId, avatarId) {
-    Keen.ajax.post ("https://graph.facebook.com/v2.8/" +
-        v.user_id + "?access_token=" + facebook.token, {}, {
+function retryGetUserName (id, nameId) {
+    Keen.ajax.get ("https://graph.facebook.com/v2.8/" + id, {
+        access_token: facebook.token
+    }, {
         onSuccess: function (data) {
-            Keen.log (data);
+            var nameEl = Ki (nameId);
+
+            if (nameEl && data.name) {
+                nameEl.textContent = data.name;
+            }
         },
         onFail: function () {
             setTimeout (function () {
-                retryGetUserData (id, nameId, avatarId);
+                retryGetUserName (id, nameId);
+            }, 5000);
+        }
+    });
+}
+
+
+function retryGetUserPhoto (id, imgId) {
+    Keen.ajax.get ("https://graph.facebook.com/" + id + "/picture", {
+        access_token: facebook.token,
+        redirect: 0,
+        fields: "url"
+    }, {
+        onSuccess: function (data) {
+            var imgEl = Ki (imgId);
+
+            if (imgEl && data.data.url) {
+                imgEl.setAttribute ("src", data.data.url);
+            }
+        },
+        onFail: function () {
+            setTimeout (function () {
+                retryGetUserPhoto (id, imgId);
             }, 5000);
         }
     });
@@ -476,7 +503,8 @@ function markerClicked () {
         nameId = "name_" + v.id;
         avatarId = "avatar" + v.id;
 
-        retryGetUserData (v.user_id, nameId, avatarId);
+        retryGetUserName (v.user_id, nameId);
+        retryGetUserPhoto (v.user_id, avatarId);
     }
 
     infoWindow.close ();
