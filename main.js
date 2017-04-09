@@ -438,9 +438,22 @@ function retryGetUserName (id, nameId) {
         access_token: facebook.token
     }, {
         onSuccess: function (data) {
+            if (!data || !data.name) {
+                return;
+            }
+
+            if (facebook.cache [id]) {
+                facebook.cache [id].name = data.name;
+            } else {
+                facebook.cache [id] = {
+                    id: id,
+                    name: data.name
+                };
+            }
+
             var nameEl = Ki (nameId);
 
-            if (nameEl && data.name) {
+            if (nameEl) {
                 nameEl.textContent = data.name;
             }
         },
@@ -460,9 +473,22 @@ function retryGetUserPhoto (id, imgId) {
         fields: "url"
     }, {
         onSuccess: function (data) {
+            if (!data || !data.data || !data.data.url) {
+                return;
+            }
+
+            if (facebook.cache [id]) {
+                facebook.cache [id].img = data.data.url;
+            } else {
+                facebook.cache [id] = {
+                    id: id,
+                    img: data.data.url
+                };
+            }
+
             var imgEl = Ki (imgId);
 
-            if (imgEl && data.data.url) {
+            if (imgEl) {
                 imgEl.setAttribute ("src", data.data.url);
             }
         },
