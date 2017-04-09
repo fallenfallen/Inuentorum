@@ -16,6 +16,10 @@ var committingMarker = false;
 var urgencyColors = [ "#30e31d", "#a9e31d", "#e3e11d", "#f6d912", "#f61212" ];
 var prevCategoryEl = null;
 var categoryCellEls = [];
+var catCellElsHashtable = {};
+var profileMarkersEl = Ki ("profile_markers");
+var markersById = {};
+var profileLineEl = Ki ("profile_line");
 
 
 var TextDialog = function (dialogEl) {
@@ -505,7 +509,11 @@ function deleteMarker (id) {
     Keen.ajax.post ("http://dev2.gditeck.com/getInfo.php", {
         act: "delete",
         id: id
-    }, {});
+    }, {
+        onSuccess: function () {
+            retryMyMarkers ();
+        }
+    });
 
     textDialog.show (tr ("Delete ..."), tr ("Your marker will be" +
         "removed later."), tr ("Got It!"));
@@ -572,8 +580,9 @@ function markerClicked () {
 function loadMarker (v) {
     marker = new google.maps.Marker ();
     marker.addListener ("click", markerClicked);
-
     Keen.data (marker, "marker", v);
+
+    markersById [v.id] = marker;
 
     marker.setPosition ({
         lat: parseFloat (v.lat),
@@ -588,7 +597,7 @@ function loadMarker (v) {
 }
 
 
-function loadMarkers (category, el) {
+function loadMarkers (category, el, callback) {
     textDialog.show (tr ("Please, wait ..."),
                     tr ("We're loading markers ..."));
 
@@ -611,6 +620,8 @@ function loadMarkers (category, el) {
                 v.setMap (null);
             });
 
+            markersById = {};
+
             Keen.each (data, function (k, v) {
                 loadMarker (v);
             });
@@ -623,6 +634,10 @@ function loadMarkers (category, el) {
 
             prevCategoryEl = el;
             Keen.class.add (el, "active_category");
+
+            if (callback) {
+                callback ();
+            }
         },
         onFail: function () {
             textDialog.show (tr ("Sorry ..."),
@@ -663,6 +678,8 @@ function commitMarker (latLng) {
 
                 loadMarkers (v.category,
                     categoryCellEls [categoriesSelectEl.selectedIndex]);
+
+                retryMyMarkers ();
             },
 
             onFail: function () {
@@ -704,6 +721,8 @@ function retryCategories () {
                     '<option value="' + v.id + '">' + v.name + '</option>';
 
                 categoryCellEls.push (cell);
+
+                catCellElsHashtable [v.id] = cell;
             });
 
             Keen.show (Ki ("categories_wrapper"));
@@ -717,6 +736,69 @@ function retryCategories () {
         
         onFail: function () {
             setTimeout (retryCategories, 5000);
+        }
+    });
+}
+
+
+function myMarkerClicked (event) {
+    var v = Keen.data (event.target, "my");
+
+    loadMarkers (v.category,
+        catCellElsHashtable [v.category], function () {
+            
+        markerClicked.call (markersById [v.id]);
+    });
+}
+
+
+function addMyMarker (v) {
+    var line = Keen.createElement ("tr"),
+        cell = Keen.createElement ("td", {
+
+            colspan: 2
+        });
+
+
+    Keen.data (cell, "my", v);
+    Keen.event.add (cell, "click", myMarkerClicked);
+    Keen.class.add (line, "my_marker");
+    Keen.style (cell, "color", urgencyColors [v.urgency]);
+
+    line.appendChild (cell);
+    profileMarkersEl.appendChild (line);
+    cell.textContent = v.title;
+
+}
+
+
+function retryMyMarkers () {
+    Keen.ajax.post ("http://dev2.gditeck.com/getInfo.php", {
+        act: "my",
+        user_id: facebook.id
+    }, {
+        onSuccess: function (data) {
+            if (!data) {
+                setTimeout (retryMyMarkers, 5000);
+
+                return;
+            }
+
+            for (var i = 0; i < profileMarkersEl.childNodes.length; i++) {
+                if (profileMarkersEl.childNodes [i] === profileLineEl) {
+                    continue;
+                }
+
+                profileMarkersEl.removeChild (profileMarkersEl.childNodes [i]);
+            }
+
+            Keen.each (data, function (k, v) {
+                addMyMarker (v);
+            });
+        },
+
+        onFail: function () {
+            setTimeout (retryMyMarkers, 5000);
         }
     });
 }
@@ -865,6 +947,8 @@ function setProfile (name, img, id, token) {
         textDialog.show (tr ("Please, wait ..."),
             tr ("We're fetching some data ..."));
     });
+
+    retryMyMarkers ();
 }
 
 
